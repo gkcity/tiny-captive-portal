@@ -135,7 +135,7 @@ static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType
 }
 
 TINY_LOR
-static void HapServerHandler_Dispose(ChannelHandler *thiz)
+static void WebServerHandler_Dispose(ChannelHandler *thiz)
 {
     RETURN_IF_FAIL(thiz);
 
@@ -145,6 +145,7 @@ static void HapServerHandler_Dispose(ChannelHandler *thiz)
 TINY_LOR
 static void WebServerHandler_Delete(ChannelHandler *thiz)
 {
+    WebServerHandler_Dispose(thiz);
     tiny_free(thiz);
 }
 
