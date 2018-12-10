@@ -4,3 +4,4 @@
 #
 #-------------------------------------------------------------------------------------
 ADD_SUBDIRECTORY(captive-portal)
+ADD_SUBDIRECTORY(sample)

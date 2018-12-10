@@ -66,7 +66,7 @@ static void sendResponse(ChannelHandler *thiz, Channel *channel, int code, const
             HttpMessage_SetContent(&response, type, length, (const uint8_t *)body);
         }
 
-        SocketChannel_StartWrite(channel, DATA_HTTP_MESSAGE, body, 0);
+        SocketChannel_StartWrite(channel, DATA_HTTP_MESSAGE, &response, 0);
     } while (false);
 
     HttpMessage_Dispose(&response);
