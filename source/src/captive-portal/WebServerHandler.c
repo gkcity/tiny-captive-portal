@@ -157,6 +157,10 @@ static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType
 
     sendResponse(thiz, channel, 200, "OK", "text/html", "hello");
 
+//    const char *txt = "<meta HTTP-EQUIV='REFRESH' content='0; url=http://192.168.4.1/login'>";
+//    sendResponse(thiz, channel, 200, "OK", "text/html", txt);
+
+
 //    if (STR_EQUAL(URI_IDENTIFY, request->request_line.uri))
 //    {
 //        if (ctx->identifyHandler == NULL)
