@@ -110,7 +110,7 @@ TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
             break;
         }
 
-        server = WebServer_New(80);
+        server = WebServer_New(ip, 80);
         if (server == NULL)
         {
             ret = TINY_RET_E_STARTED;

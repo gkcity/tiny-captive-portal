@@ -26,11 +26,11 @@ static void _Initializer(Channel *channel, void *ctx)
 {
     SocketChannel_AddLast(channel, ChannelIdleStateHandler(0, 0, WEB_CONNECTION_TIMEOUT));
     SocketChannel_AddLast(channel, HttpMessageCodec());
-    SocketChannel_AddLast(channel, WebServerHandler());
+    SocketChannel_AddLast(channel, WebServerHandler((uint32_t) ctx));
 }
 
 TINY_LOR
-Channel * WebServer_New(uint16_t port)
+Channel * WebServer_New(uint32_t ip, uint16_t port)
 {
     Channel *thiz = NULL;
 
@@ -43,7 +43,7 @@ Channel * WebServer_New(uint16_t port)
             break;
         }
 
-        StreamServerChannel_Initialize(thiz, _Initializer, NULL);
+        StreamServerChannel_Initialize(thiz, _Initializer, (void *) ip);
 
         if (RET_FAILED(SocketChannel_Open(thiz, TYPE_TCP_SERVER)))
         {

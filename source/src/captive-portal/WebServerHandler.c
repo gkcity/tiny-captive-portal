@@ -72,6 +72,72 @@ static void sendResponse(ChannelHandler *thiz, Channel *channel, int code, const
     HttpMessage_Dispose(&response);
 }
 
+static void redirectTo(ChannelHandler *thiz, Channel *channel, uint32_t ip)
+{
+    HttpMessage response;
+
+    char host[64];
+    uint8_t *a = (uint8_t *) &ip;
+    snprintf(host, 64, "http://%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
+
+    printf("redirectTo: %s\n", host);
+
+    do
+    {
+        if (RET_FAILED(HttpMessage_Construct(&response)))
+        {
+            printf("HttpMessage_Construct FAILED\n");
+            break;
+        }
+
+        HttpMessage_SetResponse(&response, 302, "Found");
+        HttpMessage_SetVersion(&response, 1, 1);
+        HttpHeader_Set(&response.header, "Location", host);
+
+        SocketChannel_StartWrite(channel, DATA_HTTP_MESSAGE, &response, 0);
+    } while (false);
+
+    HttpMessage_Dispose(&response);
+}
+
+static bool isIp(const char *host)
+{
+    for (size_t i = 0; i < strlen(host); ++i)
+    {
+        const char c = host[i];
+        if (c != '.' && (c < '0' || c > '9'))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool redirect(ChannelHandler *thiz, Channel *channel, HttpMessage *request)
+{
+    bool ret = false;
+
+    do
+    {
+        const char *host = HttpHeader_GetValue(&request->header, "host");
+        if (host == NULL)
+        {
+            break;
+        }
+
+        if (isIp(host))
+        {
+            break;
+        }
+
+        redirectTo(thiz, channel, (uint32_t) thiz->context);
+        ret = true;
+    } while (false);
+
+    return ret;
+}
+
 TINY_LOR
 static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType type, const void *data, uint32_t len)
 {
@@ -83,6 +149,11 @@ static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType
     }
 
     LOG_I(TAG, "_ChannelRead: %s %s", request->request_line.method, request->request_line.uri);
+
+    if (redirect(thiz, channel, request))
+    {
+        return true;
+    }
 
     sendResponse(thiz, channel, 200, "OK", "text/html", "hello");
 
@@ -150,7 +221,7 @@ static void WebServerHandler_Delete(ChannelHandler *thiz)
 }
 
 TINY_LOR
-static TinyRet WebServerHandler_Construct(ChannelHandler *thiz)
+static TinyRet WebServerHandler_Construct(ChannelHandler *thiz, uint32_t ip)
 {
     TinyRet ret = TINY_RET_OK;
 
@@ -167,14 +238,14 @@ static TinyRet WebServerHandler_Construct(ChannelHandler *thiz)
         thiz->channelInactive = _ChannelInactive;
         thiz->channelRead = _ChannelRead;
         thiz->channelWrite = NULL;
-        thiz->context = NULL;
+        thiz->context = (void *) ip;
     } while (0);
 
     return ret;
 }
 
 TINY_LOR
-ChannelHandler * WebServerHandler(void)
+ChannelHandler * WebServerHandler(uint32_t ip)
 {
     ChannelHandler *thiz = NULL;
 
@@ -186,7 +257,7 @@ ChannelHandler * WebServerHandler(void)
             break;
         }
 
-        if (RET_FAILED(WebServerHandler_Construct(thiz)))
+        if (RET_FAILED(WebServerHandler_Construct(thiz, ip)))
         {
             WebServerHandler_Delete(thiz);
             thiz = NULL;

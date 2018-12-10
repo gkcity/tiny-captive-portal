@@ -23,7 +23,7 @@ TINY_BEGIN_DECLS
 #define WebServerHandler_Name  "WebServerHandler"
 
 TINY_LOR
-ChannelHandler * WebServerHandler(void);
+ChannelHandler * WebServerHandler(uint32_t ip);
 
 
 TINY_END_DECLS

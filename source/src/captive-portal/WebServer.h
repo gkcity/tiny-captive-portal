@@ -22,7 +22,7 @@ TINY_BEGIN_DECLS
 #define WEB_CONNECTION_TIMEOUT      60
 
 TINY_LOR
-Channel * WebServer_New(uint16_t port);
+Channel * WebServer_New(uint32_t ip, uint16_t port);
 
 
 
