@@ -138,6 +138,8 @@ static bool redirect(ChannelHandler *thiz, Channel *channel, HttpMessage *reques
     return ret;
 }
 
+const char * txt = "<!DOCTYPE html><html><head><title>CaptivePortal</title></head><body><h1>Hello Ouyang!</h1><p>This is a captive portal example. All requests will be redirected here.</p></body></html>";
+
 TINY_LOR
 static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType type, const void *data, uint32_t len)
 {
@@ -150,15 +152,15 @@ static bool _ChannelRead(ChannelHandler *thiz, Channel *channel, ChannelDataType
 
     LOG_I(TAG, "_ChannelRead: %s %s", request->request_line.method, request->request_line.uri);
 
-    if (redirect(thiz, channel, request))
-    {
-        return true;
-    }
+    // if (redirect(thiz, channel, request))
+    // {
+    //     return true;
+    // }
 
-    sendResponse(thiz, channel, 200, "OK", "text/html", "hello");
+    sendResponse(thiz, channel, 200, "OK", "text/html", txt);
 
-//    const char *txt = "<meta HTTP-EQUIV='REFRESH' content='0; url=http://192.168.4.1/login'>";
-//    sendResponse(thiz, channel, 200, "OK", "text/html", txt);
+    // const char *txt = "<meta HTTP-EQUIV='REFRESH' content='0; url=http://192.168.4.1/login'>";
+    // sendResponse(thiz, channel, 200, "OK", "text/html", txt);
 
 
 //    if (STR_EQUAL(URI_IDENTIFY, request->request_line.uri))
