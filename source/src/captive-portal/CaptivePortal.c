@@ -14,9 +14,13 @@
 #include <tiny_malloc.h>
 #include <tiny_log.h>
 #include <channel/SocketChannel.h>
+#include <channel/ChannelIdleStateHandler.h>
+#include <codec-http/HttpMessageCodec.h>
 #include "CaptivePortal.h"
 #include "DNSServer.h"
 #include "WebServer.h"
+#include "WebServerHandler.h"
+#include "CaptivePortalHandle.h"
 
 #define TAG     "CaptivePortal"
 
@@ -85,6 +89,32 @@ void CaptivePortal_Dispose(CaptivePortal *thiz)
 }
 
 TINY_LOR
+static void _InitializeChannelHandler(Channel *channel, void *ctx)
+{
+    ChannelHandler *handler = WebServerHandler();
+    HttpRequestHandlers *handlers = WebServerHandler_GetHandlers(handler);
+
+    LOG_I(TAG, "InitializeChannelHandler");
+
+    if (handlers != NULL)
+    {
+        if (RET_FAILED(HttpRequestHandlers_Put(handlers, "GET", "/", handleRoot, NULL)))
+        {
+            LOG_E(TAG, "HttpRequestHandlers_Put failed");
+        }
+
+        if (RET_FAILED(HttpRequestHandlers_PutDefaultHandler(handlers, handleNotFound, NULL)))
+        {
+            LOG_E(TAG, "HttpRequestHandlers_PutDefaultHandler failed");
+        }
+    }
+
+    SocketChannel_AddLast(channel, ChannelIdleStateHandler(0, 0, WEB_CONNECTION_TIMEOUT));
+    SocketChannel_AddLast(channel, HttpMessageCodec());
+    SocketChannel_AddLast(channel, handler);
+}
+
+TINY_LOR
 TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
 {
     TinyRet ret = TINY_RET_OK;
@@ -110,7 +140,7 @@ TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
             break;
         }
 
-        server = WebServer_New(ip, 80);
+        server = WebServer_New(ip, 80, _InitializeChannelHandler, NULL);
         if (server == NULL)
         {
             ret = TINY_RET_E_STARTED;
@@ -121,7 +151,7 @@ TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
         ret = Bootstrap_AddChannel(&thiz->bootstrap, dns);
         if (RET_FAILED(ret))
         {
-            LOG_D(TAG, "Bootstrap_AddChannel failed");
+            LOG_E(TAG, "Bootstrap_AddChannel failed");
             SocketChannel_Delete(dns);
             SocketChannel_Delete(server);
             break;
@@ -130,7 +160,7 @@ TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
         ret = Bootstrap_AddChannel(&thiz->bootstrap, server);
         if (RET_FAILED(ret))
         {
-            LOG_D(TAG, "Bootstrap_AddChannel failed");
+            LOG_E(TAG, "Bootstrap_AddChannel failed");
             SocketChannel_Delete(server);
             break;
         }
@@ -138,7 +168,7 @@ TinyRet CaptivePortal_Run(CaptivePortal *thiz, uint32_t ip)
         ret = Bootstrap_Sync(&thiz->bootstrap);
         if (RET_FAILED(ret))
         {
-            LOG_D(TAG, "Bootstrap_Sync failed");
+            LOG_E(TAG, "Bootstrap_Sync failed");
             SocketChannel_Delete(dns);
             SocketChannel_Delete(server);
             break;

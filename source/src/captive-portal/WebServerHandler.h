@@ -16,6 +16,7 @@
 #define __WEB_SERVER_HANDLER_H__
 
 #include <channel/ChannelHandler.h>
+#include <handler/HttpRequestHandlers.h>
 
 TINY_BEGIN_DECLS
 
@@ -23,7 +24,10 @@ TINY_BEGIN_DECLS
 #define WebServerHandler_Name  "WebServerHandler"
 
 TINY_LOR
-ChannelHandler * WebServerHandler(uint32_t ip);
+ChannelHandler * WebServerHandler(void);
+
+TINY_LOR
+HttpRequestHandlers * WebServerHandler_GetHandlers(ChannelHandler *thiz);
 
 
 TINY_END_DECLS

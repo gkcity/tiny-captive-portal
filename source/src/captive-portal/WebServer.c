@@ -11,26 +11,16 @@
  */
 
 #include <tiny_log.h>
-#include <channel/ChannelIdleStateHandler.h>
 #include <channel/SocketChannel.h>
 #include <channel/stream/StreamServerChannel.h>
 #include <channel/stream/StreamServerChannelContext.h>
-#include <codec-http/HttpMessageCodec.h>
 #include "WebServer.h"
 #include "WebServerHandler.h"
 
 #define TAG     "WebServer"
 
 TINY_LOR
-static void _Initializer(Channel *channel, void *ctx)
-{
-    SocketChannel_AddLast(channel, ChannelIdleStateHandler(0, 0, WEB_CONNECTION_TIMEOUT));
-    SocketChannel_AddLast(channel, HttpMessageCodec());
-    SocketChannel_AddLast(channel, WebServerHandler((uint32_t) ctx));
-}
-
-TINY_LOR
-Channel * WebServer_New(uint32_t ip, uint16_t port)
+Channel * WebServer_New(uint32_t ip, uint16_t port, ChannelInitializer initializer, void *ctx)
 {
     Channel *thiz = NULL;
 
@@ -43,7 +33,7 @@ Channel * WebServer_New(uint32_t ip, uint16_t port)
             break;
         }
 
-        StreamServerChannel_Initialize(thiz, _Initializer, (void *) ip);
+        StreamServerChannel_Initialize(thiz, initializer, ctx);
 
         if (RET_FAILED(SocketChannel_Open(thiz, TYPE_TCP_SERVER)))
         {
