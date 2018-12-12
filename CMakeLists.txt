@@ -54,6 +54,7 @@ MESSAGE(STATUS "library output: ${LIBRARY_OUTPUT_PATH}")
 #-------------------------------------------------------------------------------------
 SET(CaptivePortal_Header
 		${SOURCE_ROOT}/captive-portal/CaptivePortal.h
+		${SOURCE_ROOT}/captive-portal/CaptivePortalHandle.h
 		${SOURCE_ROOT}/captive-portal/DNSServer.h
 		${SOURCE_ROOT}/captive-portal/WebServer.h
 		${SOURCE_ROOT}/captive-portal/WebServerHandler.h
@@ -61,6 +62,7 @@ SET(CaptivePortal_Header
 
 SET(CaptivePortal_Source
 		${SOURCE_ROOT}/captive-portal/CaptivePortal.c
+		${SOURCE_ROOT}/captive-portal/CaptivePortalHandle.c
 		${SOURCE_ROOT}/captive-portal/DNSServer.c
 		${SOURCE_ROOT}/captive-portal/WebServer.c
 		${SOURCE_ROOT}/captive-portal/WebServerHandler.c

@@ -6,6 +6,7 @@
 
 SET(CaptivePortal_Header
 		CaptivePortal.h
+		CaptivePortalHandle.h
 		DNSServer.h
 		WebServer.h
 		WebServerHandler.h
@@ -13,6 +14,7 @@ SET(CaptivePortal_Header
 
 SET(CaptivePortal_Source
 		CaptivePortal.c
+		CaptivePortalHandle.c
 		DNSServer.c
 		WebServer.c
 		WebServerHandler.c
